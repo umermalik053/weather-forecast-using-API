@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <style>
+        body{
+            background-image: url(sun.jpeg);
+        }
+        .weatherCard {
+            border: 1px solid black;
+            margin-top: 30px;
+            border-radius: 30px;
+            padding: 10px;
+            color: white;
+            background-color: rgb(29, 26, 26);
+        }
+
+        #forecast {
+            display: flex;
+            overflow-x: scroll;
+        }
+
+        #forecast>div {
+            width: 190px;
+            margin: 15px;
+            padding: 50px;
+
+        }
+        button{
+            width: 8%;
+            padding: 5px;
+            border-radius: 20%;
+            font-size: 20px;
+            font-style: italic;
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+            
+        }
+        input{
+            padding: 20px;
+            width: 20%;
+            border-radius: 10px 5px 10px 5px;
+        }
+        h2{
+            font-size: 30px;
+            font-style: italic;
+            font-family:cursive ;
+        }
+        h1{
+            font-size: 40px;
+            font-style: italic;
+        }
+        center{
+            background-color: rgb(146, 187, 228);
+        }
+        BUTTON:hover{
+            background-color: rgb(87, 202, 248);
+            font-size: 30px;
+            cursor: pointer;
+            box-shadow:  10px #0e0c0c;
+        }
+        input:hover{
+            background-color: rgb(67, 73, 73);
+            
+        }
+    </style>
+
+</head>
+
+<body>
+    <center>
+    <h1>WEATHER APP</h1>
+
+
+       <form onsubmit="submitFunction(); return false">
+        <h2>City Name: </h2><input type="text" id="cityName" required placeholder="ENTER CITY NAME">
+        <br><br>
+        <button>click</button>
+    </form>
+</center>
+    
+    <div id="current"></div>
+    
+    <div id="forecast"> </div>
+
+
+
+    <script>
+
+        // let formatedTime = moment("2022-09-12 21:00:00").format("ddd ha");
+        // console.log("formatedTime: ", formatedTime);
+
+
+        function submitFunction() {
+            let cityName = document.querySelector("#cityName").value
+
+            console.log("cityName: ", cityName);
+
+            // get current weather 
+            axios.get(`https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=27f3044873b05cba36a93178fff9e224&units=metric`)
+                .then(function (response) {
+
+                    document.querySelector("#current").innerHTML =
+                        `<div class="weatherCard">
+                        <span id="upResult"></span>
+                        <h1 id="result"></h1>
+                        <img src="" id="icon" />
+                        <br />
+                        <span id="downResult"></span>
+                    </div>`
+
+
+                    // handle success
+                    console.log(response.data);
+
+                    document.querySelector("#result").innerHTML =
+                        `${response.data.main.temp}°C`;
+                    document.querySelector("#upResult").innerHTML =
+                        `${response.data.name} <br/> Now`;
+                    document.querySelector("#downResult").innerHTML =
+                        `${response.data.main.temp_min}°C - ${response.data.main.temp_max}°C `;
+
+                    document.querySelector("#icon").src = `http://openweathermap.org/img/wn/${response.data.weather[0].icon}@4x.png`
+                })
+                .catch(function (error) {
+                    // handle error
+                    console.log(error);
+                })
+
+            // get 5 day forecast
+            axios.get(`https://api.openweathermap.org/data/2.5/forecast?q=${cityName}&appid=27f3044873b05cba36a93178fff9e224&units=metric`)
+                .then(function (response) {
+
+
+                    console.log("forecast: ", response.data);
+
+                    let forecastDiv = document.querySelector("#forecast");
+                    forecastDiv.innerHTML = ""
+
+                    response.data.list.map(eachItem => {
+
+                        forecastDiv.innerHTML +=
+                            `<div class="weatherCard">
+                                <span>${moment(eachItem.dt_txt).format("ddd D/M")}</span>
+                                <br/>
+                                <span>${moment(eachItem.dt_txt).format("ha")}</span>
+                                <h1 >${eachItem?.main?.temp.toFixed(0)}°C</h1>
+                                <span>${eachItem?.weather[0].description}</span>
+                                <img src="https://openweathermap.org/img/wn/${eachItem?.weather[0]?.icon}@2x.png"/>
+                                <br />
+                                <span>${eachItem?.main?.temp_min.toFixed(0)}°C - ${eachItem?.main?.temp_min.toFixed(0)}°C </span>
+                                </div>`
+                    })
+                })
+                .catch(function (error) {
+                    // handle error
+                    console.log(error);
+                })
+
+        }
+
+    </script>
+</body>
+
+</html>
